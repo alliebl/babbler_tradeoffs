@@ -1,0 +1,51 @@
+hist(wed$avg_max_temp)
+hist(wed$water12_avg)
+hist(wed$newwater_avg)
+hist(wed$water35_avg)
+hist(log(wed$days_since_storm))
+
+wed$log_avg_max_temp<-log(wed$avg_max_temp)
+wed$log_water12_avg<-log(wed$water12_avg)
+wed$log_newwater_avg<-log(wed$newwater_avg)
+wed$log_water35_avg<-log(wed$water35_avg)
+wed$log_days_since_rain<-log(wed$days_since_storm)
+View(wed)
+
+hist(wed$log_avg_max_temp)
+hist(wed$log_water12_avg)
+hist(wed$newwater_avg)
+hist(wed$log_water35_avg)
+
+wed_sub<-subset(wed_sub, wed_sub$log_days_since_rain>0)
+View(wed_sub)
+
+library(lme4)
+mm1<-lmer( clutch_size ~ log_water35_avg+log_days_since_rain+log_avg_max_temp+(1|year/mum), data=wed_sub)
+summary(mm1)
+
+mm2<-lmer(egg_vol ~ log_water35_avg+log_days_since_rain+log_avg_max_temp+(1|year/mum), data=wed_sub)
+summary(mm2)
+
+
+mm3a<-lmer(egg_vol ~ clutch_size*log_avg_max_temp+(1|year/mum), data=wed_sub)
+summary(mm3a)
+
+mm3b<-lmer(egg_vol ~ clutch_size*log_water35+(1|year/mum), data=wed_sub)
+summary(mm3b)
+
+mm3c<-lmer(egg_vol ~ clutch_size*days_since_rain+(1|year/mum), data=wed_sub)
+summary(mm3c)
+
+library(ggplot2)
+#Figure 2
+ggplot(data=wed, aes(x= avg_max_temp, y=clutch_size))+geom_smooth(method=lm, color= "black")+geom_jitter()+ylab("Clutch Size")+xlab("Average Maximum Temperature")+theme_classic()
+
+ggplot(data=wed, aes(x= water35_avg, y=clutch_size))+geom_smooth(method=lm, color= "black")+geom_jitter()+ylab("Clutch Size")+xlab("Residual Rainfall (mm)")+theme_classic()
+
+#Figure 3
+ggplot(data=wed, aes(x= avg_max_temp, y=egg_vol))+geom_smooth(method=lm, color= "black")+geom_point()+ylab("Egg Volume")+xlab("Average Maximum Temperature")+theme_classic()
+
+ggplot(data=wed, aes(x= days_since_storm, y=egg_vol))+geom_smooth(method=lm, color= "black")+geom_point()+ylab("Egg Volume")+xlab("Days Since Last Rainfall")+theme_classic()
+
+#Figure 4
+ggplot(data=wed, aes(x= clutch_size, y=egg_vol))+geom_smooth(method=lm, color= "black")+geom_jitter()+ylab("Egg Volume")+xlab("Clutch Size")+theme_classic()
